@@ -2,6 +2,7 @@ package com.hqh.greennews.ui.theme.article
 
 import android.content.Context
 import android.content.Intent
+import android.content.res.Configuration
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyListState
@@ -22,11 +23,18 @@ import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.tooling.preview.Devices
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import com.example.jetnews.utils.isScrolled
+import com.hqh.greennews.data.Result
+import com.hqh.greennews.data.posts.impl.BlockingFakePostsRepository
+import com.hqh.greennews.data.posts.impl.post3
+import com.hqh.greennews.utils.isScrolled
 import com.hqh.greennews.R
+import com.hqh.greennews.ui.article.PostContent
+import com.hqh.greennews.ui.theme.GreenNewsTheme
 import com.hqh.greennews.viewmodels.Post
+import kotlinx.coroutines.runBlocking
 
 /**
  * Stateless Article Screen that displays a single post adapting the UI to different screen sizes.
@@ -132,7 +140,7 @@ private fun ArticleScreenContent(
                 backgroundColor = MaterialTheme.colors.surface
             )
         },
-        bottomBar = bottomBarContent
+//        bottomBar = bottomBarContent
     ) {
         innerPadding -> PostContent(
             post = post,
@@ -166,11 +174,11 @@ private fun BottomBar(
                 .height(56.dp)
                 .fillMaxWidth()
         ) {
-            FavoriteButton(onClick = onUnimplementedAction)
-            BookmarkButton(isBookmarked = isFavorite, onClick = onToggleFavorite)
-            ShareButton(onClick = onSharePost)
+//            FavoriteButton(onClick = onUnimplementedAction)
+//            BookmarkButton(isBookmarked = isFavorite, onClick = onToggleFavorite)
+//            ShareButton(onClick = onSharePost)
             Spacer(modifier = Modifier.weight(1f))
-            TextSettingsButton(onClick = onUnimplementedAction)
+//            TextSettingsButton(onClick = onUnimplementedAction)
         }
     }
 }
@@ -212,15 +220,32 @@ fun sharePost(post: Post, context: Context) {
     context.startActivity(Intent.createChooser(intent, context.getString(R.string.article_share_post)))
 }
 
-//@Preview("Article screen")
-//@Preview("Article screen (dark)", uiMode = Configuration.UI_MODE_NIGHT_YES)
-//@Preview("Article screen (big font)", fontScale = 1.5f)
-//@Composable
-//fun PreviewArticleDrawer() {
-//    JetnewsTheme {
-//        val post = runBlocking {
-//            (BlockingFakePostsRepository().getPost(post3.id) as Result.Success).data
-//        }
-//        ArticleScreen(post, false, {}, false, {})
-//    }
-//}
+@Preview("Article screen")
+@Preview("Article screen (dark)", uiMode = Configuration.UI_MODE_NIGHT_YES)
+@Preview("Article screen (big font)", fontScale = 1.5f)
+@Composable
+fun PreviewArticleDrawer() {
+    GreenNewsTheme {
+        val post = runBlocking {
+            (BlockingFakePostsRepository().getPost(post3.id) as Result.Success).data
+        }
+        ArticleScreen(post, false, {}, false, {})
+    }
+}
+
+@Preview("Article screen navrail", device = Devices.PIXEL_C)
+@Preview(
+    "Article screen navrail (dark)",
+    uiMode = Configuration.UI_MODE_NIGHT_YES,
+    device = Devices.PIXEL_C
+)
+@Preview("Article screen navrail (big font)", fontScale = 1.5f, device = Devices.PIXEL_C)
+@Composable
+fun PreviewArticleNavRail() {
+    GreenNewsTheme {
+        val post = runBlocking {
+            (BlockingFakePostsRepository().getPost(post3.id) as Result.Success).data
+        }
+        ArticleScreen(post, true, {}, false, {})
+    }
+}

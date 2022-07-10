@@ -1,5 +1,10 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-
-    <style name="Theme.GreenNews" parent="android:Theme.Material.Light.NoActionBar" />
+    <style name="Theme.GreenNews" parent="android:Theme.Material.Light.NoActionBar" >
+        <item name="colorPrimary">@color/red700</item>
+        <item name="colorPrimaryDark">@color/red900</item>
+        <item name="colorAccent">@color/red700</item>
+        <item name="android:statusBarColor">@color/status_bar</item>
+        <item name="android:background">@color/status_bar</item>
+    </style>
 </resources>

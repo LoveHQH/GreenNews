@@ -34,6 +34,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.hqh.greennews.data.posts.impl.post3
 import com.hqh.greennews.R
 import com.hqh.greennews.ui.theme.GreenNewsTheme
 import com.hqh.greennews.viewmodels.*

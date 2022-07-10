@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.example.jetnews.data.posts.impl
+package com.hqh.greennews.data.posts.impl
 
 import com.hqh.greennews.R
 import com.hqh.greennews.viewmodels.Markup

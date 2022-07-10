@@ -14,13 +14,13 @@
  * limitations under the License.
  */
 
-package com.example.jetnews.data.posts.impl
+package com.hqh.greennews.data.posts.impl
 
-import com.example.jetnews.data.Result
-import com.example.jetnews.data.posts.PostsRepository
-import com.example.jetnews.model.Post
-import com.example.jetnews.model.PostsFeed
-import com.example.jetnews.utils.addOrRemove
+import com.hqh.greennews.data.Result
+import com.hqh.greennews.data.posts.PostsRepository
+import com.hqh.greennews.utils.addOrRemove
+import com.hqh.greennews.viewmodels.Post
+import com.hqh.greennews.viewmodels.PostsFeed
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.Flow
