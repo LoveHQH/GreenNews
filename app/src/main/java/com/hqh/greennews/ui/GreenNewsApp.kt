@@ -23,21 +23,20 @@ fun GreenNewsApp(
     val scaffoldState = rememberScaffoldState()
     val isExpandedScreen = widthSizeClass == WindowWidthSizeClass.Expanded
     GreenNewsTheme {
-        Text(text = "heello")
-//        VideoScreen()
-//        Scaffold(
-//            scaffoldState = scaffoldState,
-//            bottomBar = {
-//                GreenNewsBottomBar(navController)
-//            }
-//        )
-//        {
-//            GreenNewsNavGraph(
-//                appContainer = appContainer,
-//                isExpandedScreen = isExpandedScreen,
-//                navController = navController
-//            )
-//        }
+        VideoScreen()
+        Scaffold(
+            scaffoldState = scaffoldState,
+            bottomBar = {
+                GreenNewsBottomBar(navController)
+            }
+        )
+        {
+            GreenNewsNavGraph(
+                appContainer = appContainer,
+                isExpandedScreen = isExpandedScreen,
+                navController = navController
+            )
+        }
     }
 }
 

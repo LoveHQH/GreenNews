@@ -33,6 +33,7 @@ import com.hqh.greennews.utils.isScrolled
 import com.hqh.greennews.R
 import com.hqh.greennews.ui.article.PostContent
 import com.hqh.greennews.ui.theme.GreenNewsTheme
+import com.hqh.greennews.ui.utils.SpeakerButton
 import com.hqh.greennews.viewmodels.Post
 import kotlinx.coroutines.runBlocking
 
@@ -133,6 +134,7 @@ private fun ArticleScreenContent(
                                 .padding(start = 10.dp)
                                 .weight(1.5f)
                         )
+                        SpeakerButton(onClick = {})
                     }
                 },
                 navigationIcon = navigationIconContent,
