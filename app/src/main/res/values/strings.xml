@@ -38,4 +38,7 @@
     <!-- Navigation actions -->
     <string name="cd_navigate_up">Navigate up</string>
     <string name="cd_navigate_article">Navigate to the home screen</string>
+
+    <!-- database   -->
+    <string name="database">PosterArticle</string>
 </resources>

@@ -26,15 +26,12 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Devices
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import com.hqh.greennews.data.Result
-import com.hqh.greennews.data.posts.impl.BlockingFakePostsRepository
-import com.hqh.greennews.data.posts.impl.post3
 import com.hqh.greennews.utils.isScrolled
 import com.hqh.greennews.R
+import com.hqh.greennews.lite.model.Poster
 import com.hqh.greennews.ui.article.PostContent
 import com.hqh.greennews.ui.theme.GreenNewsTheme
 import com.hqh.greennews.ui.utils.SpeakerButton
-import com.hqh.greennews.viewmodels.Post
 import kotlinx.coroutines.runBlocking
 
 /**
@@ -49,11 +46,8 @@ import kotlinx.coroutines.runBlocking
  */
 @Composable
 fun ArticleScreen (
-    post: Post,
-    isExpandedScreen:Boolean,
+    post: Poster,
     onBack: () -> Unit,
-    isFavorite: Boolean,
-    onToggleFavorite: () -> Unit,
     modifier: Modifier = Modifier,
     lazyListState:LazyListState = rememberLazyListState()
 ){
@@ -66,8 +60,7 @@ fun ArticleScreen (
         val context = LocalContext.current
         ArticleScreenContent(
             post = post,
-            navigationIconContent = if(!isExpandedScreen){
-                {
+            navigationIconContent = {
                     IconButton(onClick = onBack) {
                         Icon(
                             imageVector = Icons.Filled.ArrowBack,
@@ -75,23 +68,14 @@ fun ArticleScreen (
                             tint = MaterialTheme.colors.primary
                         )
                     }
-                }
-            }
-            else {
-                null
-            },
-            bottomBarContent = if (!isExpandedScreen){
+                },
+            bottomBarContent =
                 {
                     BottomBar(
                         onUnimplementedAction = { showUnimplementedActionDialog = true },
-                        isFavorite = isFavorite,
-                        onToggleFavorite = onToggleFavorite,
                         onSharePost = { sharePost(post, context) },
                     )
-                }
-            } else {
-                { }
-            },
+                },
             lazyListState = lazyListState
         )
     }
@@ -105,7 +89,7 @@ fun ArticleScreen (
  */
 @Composable
 private fun ArticleScreenContent(
-    post: Post,
+    post: Poster,
     navigationIconContent: @Composable (() -> Unit)? = null,
     bottomBarContent: @Composable () -> Unit = { },
     lazyListState: LazyListState = rememberLazyListState()
@@ -127,7 +111,7 @@ private fun ArticleScreenContent(
                                 .size(36.dp)
                         )
                         Text(
-                            text = stringResource(id = R.string.published_in, post.publication?.name ?: ""),
+                            text = (post.title?: ""),
                             style = MaterialTheme.typography.subtitle2,
                             color = LocalContentColor.current,
                             modifier = Modifier
@@ -163,8 +147,6 @@ private fun ArticleScreenContent(
 @Composable
 private fun BottomBar(
     onUnimplementedAction: () -> Unit,
-    isFavorite: Boolean,
-    onToggleFavorite: () -> Unit,
     onSharePost: () -> Unit,
     modifier: Modifier = Modifier
 ) {
@@ -213,7 +195,7 @@ private fun FunctionalityNotAvailablePopup(onDismiss: () -> Unit) {
  * @param post to share
  * @param context Android context to show the share sheet in
  */
-fun sharePost(post: Post, context: Context) {
+fun sharePost(post: Poster, context: Context) {
     val intent = Intent(Intent.ACTION_SEND).apply {
         type = "text/plain"
         putExtra(Intent.EXTRA_TITLE, post.title)
@@ -222,32 +204,32 @@ fun sharePost(post: Post, context: Context) {
     context.startActivity(Intent.createChooser(intent, context.getString(R.string.article_share_post)))
 }
 
-@Preview("Article screen")
-@Preview("Article screen (dark)", uiMode = Configuration.UI_MODE_NIGHT_YES)
-@Preview("Article screen (big font)", fontScale = 1.5f)
-@Composable
-fun PreviewArticleDrawer() {
-    GreenNewsTheme {
-        val post = runBlocking {
-            (BlockingFakePostsRepository().getPost(post3.id) as Result.Success).data
-        }
-        ArticleScreen(post, false, {}, false, {})
-    }
-}
-
-@Preview("Article screen navrail", device = Devices.PIXEL_C)
-@Preview(
-    "Article screen navrail (dark)",
-    uiMode = Configuration.UI_MODE_NIGHT_YES,
-    device = Devices.PIXEL_C
-)
-@Preview("Article screen navrail (big font)", fontScale = 1.5f, device = Devices.PIXEL_C)
-@Composable
-fun PreviewArticleNavRail() {
-    GreenNewsTheme {
-        val post = runBlocking {
-            (BlockingFakePostsRepository().getPost(post3.id) as Result.Success).data
-        }
-        ArticleScreen(post, true, {}, false, {})
-    }
-}
+//@Preview("Article screen")
+//@Preview("Article screen (dark)", uiMode = Configuration.UI_MODE_NIGHT_YES)
+//@Preview("Article screen (big font)", fontScale = 1.5f)
+//@Composable
+//fun PreviewArticleDrawer() {
+//    GreenNewsTheme {
+//        val post = runBlocking {
+//            (BlockingFakePostsRepository().getPost(post3.id) as Result.Success).data
+//        }
+//        ArticleScreen(post, false, {}, false, {})
+//    }
+//}
+//
+//@Preview("Article screen navrail", device = Devices.PIXEL_C)
+//@Preview(
+//    "Article screen navrail (dark)",
+//    uiMode = Configuration.UI_MODE_NIGHT_YES,
+//    device = Devices.PIXEL_C
+//)
+//@Preview("Article screen navrail (big font)", fontScale = 1.5f, device = Devices.PIXEL_C)
+//@Composable
+//fun PreviewArticleNavRail() {
+//    GreenNewsTheme {
+//        val post = runBlocking {
+//            (BlockingFakePostsRepository().getPost(post3.id) as Result.Success).data
+//        }
+//        ArticleScreen(post, true, {}, false, {})
+//    }
+//}

@@ -39,10 +39,10 @@ import androidx.compose.ui.unit.dp
 import com.google.accompanist.swiperefresh.SwipeRefresh
 import com.google.accompanist.swiperefresh.rememberSwipeRefreshState
 import com.hqh.greennews.R
+import com.hqh.greennews.lite.model.Poster
 import com.hqh.greennews.ui.modifiers.interceptKey
 import com.hqh.greennews.ui.theme.article.sharePost
 import com.hqh.greennews.utils.isScrolled
-import com.hqh.greennews.viewmodels.Post
 import com.hqh.greennews.viewmodels.PostsFeed
 import kotlinx.coroutines.currentCoroutineContext
 import kotlinx.coroutines.isActive
@@ -55,7 +55,6 @@ import kotlinx.coroutines.isActive
 fun HomeFeedWithArticleDetailsScreen(
     uiState: ArticleUiState,
     showTopAppBar: Boolean,
-    onToggleFavorite: (String) -> Unit,
     onSelectPost: (String) -> Unit,
     onRefreshPosts: () -> Unit,
     onErrorDismiss: (Long) -> Unit,
@@ -85,7 +84,6 @@ fun HomeFeedWithArticleDetailsScreen(
                 favorites = hasPostsUiState.favorites,
                 showExpandedSearch = !showTopAppBar,
                 onArticleTapped = onSelectPost,
-                onToggleFavorite = onToggleFavorite,
 //                contentPadding = contentPadding,
                 modifier = Modifier
                     .width(334.dp)
@@ -99,7 +97,7 @@ fun HomeFeedWithArticleDetailsScreen(
             Crossfade(targetState = hasPostsUiState.selectedPost) { detailPost ->
                 // Get the lazy list state for this detail view
                 val detailLazyListState by derivedStateOf {
-                    articleDetailLazyListStates.getValue(detailPost.id)
+                    articleDetailLazyListStates.getValue(detailPost.id.toString())
                 }
 
                 // Key against the post id to avoid sharing any state between different posts
@@ -111,15 +109,15 @@ fun HomeFeedWithArticleDetailsScreen(
                             .padding(horizontal = 16.dp)
                             .fillMaxSize()
                             .notifyInput {
-                                onInteractWithDetail(detailPost.id)
+                                onInteractWithDetail(detailPost.id.toString())
                             }
                             .imePadding() // add padding for the on-screen keyboard
                     ) {
                         stickyHeader {
                             val context = LocalContext.current
                             PostTopBar(
-                                isFavorite = hasPostsUiState.favorites.contains(detailPost.id),
-                                onToggleFavorite = { onToggleFavorite(detailPost.id) },
+                                isFavorite = hasPostsUiState.favorites.contains(detailPost.id.toString()),
+//                                onToggleFavorite = { onToggleFavorite(detailPost.id.toString()) },
                                 onSharePost = { sharePost(detailPost, context) },
                                 modifier = Modifier
                                     .fillMaxWidth()
@@ -157,11 +155,9 @@ private fun Modifier.notifyInput(block: () -> Unit): Modifier =
 fun HomeFeedArticleScreen(
     uiState: ArticleUiState,
     showTopAppBar: Boolean,
-    onToggleFavorite: (String) -> Unit,
     onSelectPost: (String) -> Unit,
     onRefreshPosts: () -> Unit,
     onErrorDismiss: (Long) -> Unit,
-//    openDrawer: () -> Unit,
     homeListLazyListState: LazyListState,
     scaffoldState: ScaffoldState,
     modifier: Modifier = Modifier,
@@ -183,7 +179,6 @@ fun HomeFeedArticleScreen(
             favorites = hasPostsUiState.favorites,
             showExpandedSearch = !showTopAppBar,
             onArticleTapped = onSelectPost,
-            onToggleFavorite = onToggleFavorite,
 //            contentPadding = rememberContentPaddingForScreen(
 //                additionalTop = if (showTopAppBar) 0.dp else 8.dp
 //            ),
@@ -334,7 +329,6 @@ private fun PostList(
     favorites: Set<String>,
     showExpandedSearch: Boolean,
     onArticleTapped: (postId: String) -> Unit,
-    onToggleFavorite: (String) -> Unit,
     modifier: Modifier = Modifier,
     contentPadding: PaddingValues = PaddingValues(0.dp),
     state: LazyListState = rememberLazyListState(),
@@ -361,8 +355,7 @@ private fun PostList(
                 PostListSimpleSection(
                     postsFeed.recommendedPosts,
                     onArticleTapped,
-                    favorites,
-                    onToggleFavorite
+                    favorites
                 )
             }
         }
@@ -401,18 +394,15 @@ private fun FullScreenLoading() {
  */
 @Composable
 private fun PostListSimpleSection(
-    posts: List<Post>,
+    posts: List<Poster>,
     navigateToArticle: (String) -> Unit,
     favorites: Set<String>,
-    onToggleFavorite: (String) -> Unit
 ) {
     Column {
         posts.forEach { post ->
             PostCardSimple(
                 post = post,
                 navigateToArticle = navigateToArticle,
-                isFavorite = favorites.contains(post.id),
-                onToggleFavorite = { onToggleFavorite(post.id) }
             )
             PostListDivider()
         }
@@ -426,7 +416,7 @@ private fun PostListSimpleSection(
  * @param navigateToArticle (event) request navigation to Article screen
  */
 @Composable
-private fun PostListTopSection(post: Post, navigateToArticle: (String) -> Unit) {
+private fun PostListTopSection(post: Poster, navigateToArticle: (String) -> Unit) {
     Text(
         modifier = Modifier.padding(start = 16.dp, top = 16.dp, end = 16.dp),
         text = stringResource(id = R.string.home_top_section_title),
@@ -434,7 +424,7 @@ private fun PostListTopSection(post: Post, navigateToArticle: (String) -> Unit) 
     )
     PostCardTop(
         post = post,
-        modifier = Modifier.clickable(onClick = { navigateToArticle(post.id) })
+        modifier = Modifier.clickable(onClick = { navigateToArticle(post.id.toString()) })
     )
     PostListDivider()
 }
@@ -447,7 +437,7 @@ private fun PostListTopSection(post: Post, navigateToArticle: (String) -> Unit) 
  */
 @Composable
 private fun PostListPopularSection(
-    posts: List<Post>,
+    posts: List<Poster>,
     navigateToArticle: (String) -> Unit
 ) {
     Column {
@@ -478,7 +468,7 @@ private fun PostListPopularSection(
  */
 @Composable
 private fun PostListHistorySection(
-    posts: List<Post>,
+    posts: List<Poster>,
     navigateToArticle: (String) -> Unit
 ) {
     Column {
@@ -586,7 +576,6 @@ private fun submitSearch(
 @Composable
 private fun PostTopBar(
     isFavorite: Boolean,
-    onToggleFavorite: () -> Unit,
     onSharePost: () -> Unit,
     modifier: Modifier = Modifier
 ) {

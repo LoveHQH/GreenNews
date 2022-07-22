@@ -1,5 +1,6 @@
 package com.hqh.greennews
 
+import android.annotation.SuppressLint
 import androidx.compose.material.*
 import androidx.compose.material3.windowsizeclass.WindowWidthSizeClass
 import androidx.compose.runtime.*
@@ -9,19 +10,14 @@ import androidx.navigation.NavDestination.Companion.hierarchy
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
-import com.hqh.greennews.data.AppContainer
 import com.hqh.greennews.ui.DefineScreens
 import com.hqh.greennews.ui.theme.GreenNewsTheme
 import com.hqh.greennews.ui.video.VideoScreen
 
 @Composable
-fun GreenNewsApp(
-    appContainer: AppContainer,
-    widthSizeClass: WindowWidthSizeClass
-) {
+fun GreenNewsApp() {
     val navController = rememberNavController()
     val scaffoldState = rememberScaffoldState()
-    val isExpandedScreen = widthSizeClass == WindowWidthSizeClass.Expanded
     GreenNewsTheme {
         VideoScreen()
         Scaffold(
@@ -32,8 +28,6 @@ fun GreenNewsApp(
         )
         {
             GreenNewsNavGraph(
-                appContainer = appContainer,
-                isExpandedScreen = isExpandedScreen,
                 navController = navController
             )
         }
@@ -52,6 +46,7 @@ fun GreenNewsBottomBar(navController: NavHostController) {
                     navController.navigate(screen.route) {
                         launchSingleTop = true
                     }
+//                    viewModel.selectTab(tab.title)
                 },
                 label = {
                     Text(text = stringResource(id = screen.label))

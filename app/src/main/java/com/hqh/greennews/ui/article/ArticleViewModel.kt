@@ -1,16 +1,21 @@
 package com.hqh.greennews.ui.article
 
+import androidx.annotation.StringRes
+import androidx.compose.runtime.MutableState
+import androidx.compose.runtime.State
+import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
-import com.hqh.greennews.data.Result
-import com.hqh.greennews.data.posts.PostsRepository
 import com.hqh.greennews.R
+import com.hqh.greennews.lite.model.Poster
+import com.hqh.greennews.lite.repositories.PosterRepository
 import com.hqh.greennews.utils.ErrorMessage
-import com.hqh.greennews.viewmodels.Post
 import com.hqh.greennews.viewmodels.PostsFeed
+import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
+import timber.log.Timber
 import java.util.*
 
 /**
@@ -33,7 +38,7 @@ sealed interface ArticleUiState{
 
     data class HasPosts(
         val postsFeed: PostsFeed,
-        val selectedPost: Post,
+        val selectedPost: Poster,
         val isArticleOpen: Boolean,
         val favorites: Set<String>,
         override val isLoading: Boolean,
@@ -73,7 +78,7 @@ private data class ArticleViewModelState(
                 // If there is none (or that post isn't in the current feed), default to the
                 // highlighted post
                 selectedPost = postsFeed.allPosts.find {
-                    it.id == selectedPostId
+                    it.id.toString() == selectedPostId
                 } ?: postsFeed.highlightedPost,
                 isArticleOpen = isArticleOpen,
                 favorites = favorites,
@@ -87,8 +92,9 @@ private data class ArticleViewModelState(
 /**
  * ViewModel that handles the business logic of the Article screen
  */
+@HiltViewModel
 class ArticleViewModel(
-    private val postsRepository: PostsRepository
+    private val postsRepository: PosterRepository
 ) : ViewModel() {
 
     private val viewModelState = MutableStateFlow(ArticleViewModelState(isLoading = true))
@@ -101,14 +107,31 @@ class ArticleViewModel(
             viewModelState.value.toUiState()
         )
 
+    private val _isLoading: MutableState<Boolean> = mutableStateOf(false)
+    val isLoading: State<Boolean> get() = _isLoading
+
+    private val _selectedTab: MutableState<Int> = mutableStateOf(0)
+    val selectedTab: State<Int> get() = _selectedTab
+
+    init {
+        Timber.d("injection MainViewModel")
+    }
+
+    fun selectTab(@StringRes tab: Int) {
+        _selectedTab.value = tab
+    }
+
+    val posterList: Flow<List<Poster>> =
+        postsRepository.loadArticlePosters(
+            onStart = { _isLoading.value = true },
+            onCompletion = { _isLoading.value = false },
+            onError = { Timber.d(it) }
+        )
+
     init {
         refreshPosts()
-
-        // Observe for favorite changes in the repo layer
         viewModelScope.launch {
-            postsRepository.observeFavorites().collect { favorites ->
-                viewModelState.update { it.copy(favorites = favorites) }
-            }
+            posterList
         }
     }
 
@@ -118,36 +141,9 @@ class ArticleViewModel(
     fun refreshPosts() {
         // Ui state is refreshing
         viewModelState.update { it.copy(isLoading = true) }
-
-        viewModelScope.launch {
-            val result = postsRepository.getPostsFeed()
-            viewModelState.update {
-                when (result) {
-                    is Result.Success -> it.copy(postsFeed = result.data, isLoading = false)
-                    is Result.Error -> {
-                        val errorMessages = it.errorMessages + ErrorMessage(
-                            id = UUID.randomUUID().mostSignificantBits,
-                            messageId = R.string.load_error
-                        )
-                        it.copy(errorMessages = errorMessages, isLoading = false)
-                    }
-                }
-            }
-        }
+        posterList
     }
 
-    /**
-     * Toggle favorite of a post
-     */
-    fun toggleFavourite(postId: String) {
-        viewModelScope.launch {
-            postsRepository.toggleFavorite(postId)
-        }
-    }
-
-    /**
-     * Selects the given article to view more information about it.
-     */
     fun selectArticle(postId: String) {
         // Treat selecting a detail as simply interacting with it
         interactedWithArticleDetails(postId)
@@ -198,7 +194,7 @@ class ArticleViewModel(
      */
     companion object {
         fun provideFactory(
-            postsRepository: PostsRepository,
+            postsRepository: PosterRepository,
         ): ViewModelProvider.Factory = object : ViewModelProvider.Factory {
             @Suppress("UNCHECKED_CAST")
             override fun <T : ViewModel> create(modelClass: Class<T>): T {

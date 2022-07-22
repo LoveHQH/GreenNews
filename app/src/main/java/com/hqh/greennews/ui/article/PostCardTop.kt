@@ -12,14 +12,14 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import com.hqh.greennews.data.posts.impl.posts
+import coil.compose.rememberAsyncImagePainter
 import com.hqh.greennews.utils.CompletePreviews
 import com.hqh.greennews.R
+import com.hqh.greennews.lite.model.Poster
 import com.hqh.greennews.ui.theme.GreenNewsTheme
-import com.hqh.greennews.viewmodels.Post
 
 @Composable
-fun PostCardTop(post: Post, modifier: Modifier = Modifier){
+fun PostCardTop(post: Poster, modifier: Modifier = Modifier){
     val typography = MaterialTheme.typography
     Column(
         modifier = modifier
@@ -31,7 +31,7 @@ fun PostCardTop(post: Post, modifier: Modifier = Modifier){
             .fillMaxWidth()
             .clip(shape = MaterialTheme.shapes.medium)
         Image(
-            painter = painterResource(post.imageId),
+            painter = rememberAsyncImagePainter(post.image),
             contentDescription = null,
             modifier = imageModifier,
             contentScale = ContentScale.Crop
@@ -45,7 +45,7 @@ fun PostCardTop(post: Post, modifier: Modifier = Modifier){
         )
 
         Text(
-            text = post.metadata.author.name,
+            text = post.sourceName,
             style = typography.subtitle2,
             modifier = Modifier.padding(bottom = 2.dp)
         )
@@ -55,8 +55,8 @@ fun PostCardTop(post: Post, modifier: Modifier = Modifier){
                 text = stringResource(
                     id = R.string.home_post_min_read,
                     formatArgs = arrayOf(
-                        post.metadata.date,
-                        post.metadata.readTimeMinutes
+                        post.sourceName,
+                        post.crawlTime
                     )
                 ),
                 style = typography.subtitle2
@@ -65,22 +65,22 @@ fun PostCardTop(post: Post, modifier: Modifier = Modifier){
     }
 }
 
-@Preview
-@Composable
-fun PostCardTopPreview() {
-    GreenNewsTheme {
-        Surface {
-            PostCardTop(posts.highlightedPost)
-        }
-    }
-}
-
-@CompletePreviews
-@Composable
-fun PostCardTopPreviews() {
-    GreenNewsTheme {
-        Surface {
-            PostCardTop(posts.highlightedPost)
-        }
-    }
-}
+//@Preview
+//@Composable
+//fun PostCardTopPreview() {
+//    GreenNewsTheme {
+//        Surface {
+//            PostCardTop(posts.highlightedPost)
+//        }
+//    }
+//}
+//
+//@CompletePreviews
+//@Composable
+//fun PostCardTopPreviews() {
+//    GreenNewsTheme {
+//        Surface {
+//            PostCardTop(posts.highlightedPost)
+//        }
+//    }
+//}

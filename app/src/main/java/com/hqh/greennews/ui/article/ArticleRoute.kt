@@ -14,23 +14,18 @@ import com.hqh.greennews.ui.theme.article.ArticleScreen
 @Composable
 fun ArticleRoute(
     articleViewModel: ArticleViewModel,
-    isExpandedScreen: Boolean,
-//    openDrawer: () -> Unit,
     scaffoldState: ScaffoldState = rememberScaffoldState()
 ) {
     val uiState by articleViewModel.uiState.collectAsState()
 
     ArticleRoute(
         uiState = uiState,
-        isExpandedScreen = isExpandedScreen,
-        onToggleFavorite = { articleViewModel.toggleFavourite(it) },
         onSelectPost = { articleViewModel.selectArticle(it) },
         onRefreshPosts = { articleViewModel.refreshPosts() },
         onErrorDismiss = { articleViewModel.errorShown(it) },
         onInteractWithFeed = { articleViewModel.interactedWithFeed() },
         onInteractWithArticleDetails = { articleViewModel.interactedWithArticleDetails(it) },
         onSearchInputChanged = { articleViewModel.onSearchInputChanged(it) },
-//        openDrawer = openDrawer,
         scaffoldState = scaffoldState,
     )
 }
@@ -41,7 +36,6 @@ fun ArticleRoute(
  * This composable is not coupled to any specific state management.
  *
  * @param uiState (state) the data to show on the screen
- * @param isExpandedScreen (state) whether the screen is expanded
  * @param onToggleFavorite (event) toggles favorite for a post
  * @param onSelectPost (event) indicate that a post was selected
  * @param onRefreshPosts (event) request a refresh of posts
@@ -56,8 +50,6 @@ fun ArticleRoute(
 @Composable
 fun ArticleRoute(
     uiState: ArticleUiState,
-    isExpandedScreen: Boolean,
-    onToggleFavorite: (String) -> Unit,
     onSelectPost: (String) -> Unit,
     onRefreshPosts: () -> Unit,
     onErrorDismiss: (Long) -> Unit,
@@ -75,18 +67,17 @@ fun ArticleRoute(
         is ArticleUiState.HasPosts -> uiState.postsFeed.allPosts
         is ArticleUiState.NoPosts -> emptyList()
     }.associate { post ->
-        key(post.id) {
-            post.id to rememberLazyListState()
+        key(post.id.toString()) {
+            post.id.toString() to rememberLazyListState()
         }
     }
 
-    val homeArticleScreenType = getHomeArticleScreenType(isExpandedScreen, uiState)
+    val homeArticleScreenType = getHomeArticleScreenType(uiState)
     when (homeArticleScreenType) {
         HomeArticleScreenType.FeedWithArticleDetails -> {
             HomeFeedWithArticleDetailsScreen(
                 uiState = uiState,
-                showTopAppBar = !isExpandedScreen,
-                onToggleFavorite = onToggleFavorite,
+                showTopAppBar = false,
                 onSelectPost = onSelectPost,
                 onRefreshPosts = onRefreshPosts,
                 onErrorDismiss = onErrorDismiss,
@@ -102,12 +93,10 @@ fun ArticleRoute(
         HomeArticleScreenType.Feed -> {
             HomeFeedArticleScreen(
                 uiState = uiState,
-                showTopAppBar = !isExpandedScreen,
-                onToggleFavorite = onToggleFavorite,
+                showTopAppBar = false,
                 onSelectPost = onSelectPost,
                 onRefreshPosts = onRefreshPosts,
                 onErrorDismiss = onErrorDismiss,
-//                openDrawer = openDrawer,
                 homeListLazyListState = homeListLazyListState,
                 scaffoldState = scaffoldState,
                 onSearchInputChanged = onSearchInputChanged,
@@ -119,14 +108,9 @@ fun ArticleRoute(
 
             ArticleScreen(
                 post = uiState.selectedPost,
-                isExpandedScreen = isExpandedScreen,
                 onBack = onInteractWithFeed,
-                isFavorite = uiState.favorites.contains(uiState.selectedPost.id),
-                onToggleFavorite = {
-                    onToggleFavorite(uiState.selectedPost.id)
-                },
                 lazyListState = articleDetailLazyListStates.getValue(
-                    uiState.selectedPost.id
+                    uiState.selectedPost.id.toString()
                 )
             )
             // If we are just showing the detail, have a back press switch to the list.
@@ -160,10 +144,8 @@ private enum class HomeArticleScreenType {
  */
 @Composable
 private fun getHomeArticleScreenType(
-    isExpandedScreen: Boolean,
     uiState: ArticleUiState
-): HomeArticleScreenType = when (isExpandedScreen) {
-    false -> {
+): HomeArticleScreenType =
         when (uiState) {
             is ArticleUiState.HasPosts -> {
                 if (uiState.isArticleOpen) {
@@ -174,6 +156,3 @@ private fun getHomeArticleScreenType(
             }
             is ArticleUiState.NoPosts -> HomeArticleScreenType.Feed
         }
-    }
-    true -> HomeArticleScreenType.FeedWithArticleDetails
-}
